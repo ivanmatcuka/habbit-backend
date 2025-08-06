@@ -2,6 +2,7 @@ services:
   db:
     image: mysql
     restart: always
+    container_name: habbit_mysql
     env_file: .env
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
