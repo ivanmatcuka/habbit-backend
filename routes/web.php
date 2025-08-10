@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,13 +17,22 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
 });
 
-Route::get('/tasks', [\App\Http\Controllers\TaskController::class, 'all']);
-Route::post('/tasks', [\App\Http\Controllers\TaskController::class, 'create']);
-Route::get('/tasks/{task}', [\App\Http\Controllers\TaskController::class, 'findById']);
-Route::post('/complete/{task}', [\App\Http\Controllers\CompletionController::class, 'store']);
-Route::patch('/tasks/{task}', [\App\Http\Controllers\TaskController::class, 'update']);
-Route::delete('/tasks/{task}', [\App\Http\Controllers\TaskController::class, 'delete']);
-Route::delete('/completions/{completion}', [\App\Http\Controllers\CompletionController::class, 'delete']);
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
