@@ -64,7 +64,7 @@ class TaskController extends Controller
 
     /**
      * Creates a task.
-     * 
+     *
      * @return JsonResponse
      */
     public function create(): JsonResponse {
