@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\CompletionController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Http\Request;
@@ -21,7 +22,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware('api')->post('/login', [AuthenticatedSessionController::class, 'authenticate']);
+Route::middleware('api')->post('/login', action: [AuthenticatedSessionController::class, 'authenticate']);
+Route::middleware('api')->post('/register', action: [AuthenticatedSessionController::class, 'register']);
+Route::middleware('api')->post('/recover', action: [NewPasswordController::class, 'recover']);
 
 Route::middleware('auth:api')->get('/tasks', [TaskController::class, 'all']);
 Route::middleware('auth:api')->get('/tasks/{task}', [TaskController::class, 'findById']);
