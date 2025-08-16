@@ -19,7 +19,6 @@ services:
     healthcheck:
       test:
         - CMD
-        - mysqladmin
         - ping
         - '-p${DB_PASSWORD}'
       retries: 3
