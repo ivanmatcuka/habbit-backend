@@ -27,10 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Set the working directory inside the container
-WORKDIR /var/www
+WORKDIR /var/www/habits
 
 # Copy the entire Laravel application code into the container
-COPY . /var/www
+COPY . /var/www/habits
 
 # Install Composer and dependencies
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
@@ -55,13 +55,13 @@ COPY --from=builder /usr/local/bin/docker-php-ext-* /usr/local/bin/
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Copy the application code and dependencies from the build stage
-COPY --from=builder /var/www /var/www
+COPY --from=builder /var/www/habits /var/www/habits
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /var/www/habits
 
 # Ensure correct permissions
-RUN chown -R www-data:www-data /var/www
+RUN chown -R www-data:www-data /var/www/habits
 
 # Switch to the non-privileged user to run the application
 USER www-data
