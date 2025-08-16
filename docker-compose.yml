@@ -20,6 +20,7 @@ services:
     healthcheck:
       test:
         - CMD
+        - ping
       retries: 3
       timeout: 5s
 
