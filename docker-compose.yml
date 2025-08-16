@@ -17,13 +17,13 @@ services:
     networks:
       - sail
       - laravel-production
-    healthcheck:
-      test:
-        - CMD
-        - ping
-        - '-p${DB_PASSWORD}'
-      retries: 3
-      timeout: 5s
+  # healthcheck:
+  #   test:
+  #     - CMD
+  #     - ping
+  #     - '-p${DB_PASSWORD}'
+  #   retries: 3
+  #   timeout: 5s
 
   php-fpm:
     # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
