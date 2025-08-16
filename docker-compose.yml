@@ -1,42 +1,87 @@
 services:
-    habit_mysql:
-        image: mysql
-        restart: always
-        container_name: habbit_mysql
-        env_file: .env
-        environment:
-            MYSQL_DATABASE: '${DB_DATABASE}'
-            MYSQL_USER: '${DB_USERNAME}'
-            MYSQL_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-        ports:
-            - '3306:3306'
-        volumes:
-            - 'sail-mysql:/var/lib/mysql'
-            - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
-        networks:
-            - sail
-        healthcheck:
-            test:
-                - CMD
-                - mysqladmin
-                - ping
-                - '-p${DB_PASSWORD}'
-            retries: 3
-            timeout: 5s
+  habit_mysql:
+    image: mysql
+    restart: always
+    container_name: habbit_mysql
+    env_file: .env
+    environment:
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+    ports:
+      - '3306:3306'
+    volumes:
+      - 'sail-mysql:/var/lib/mysql'
+      - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+    networks:
+      - sail
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - '-p${DB_PASSWORD}'
+      retries: 3
+      timeout: 5s
 
-    habit_php:
-        build: ./docker
-        container_name: habbit_php
-        ports:
-            - 9000:9000
-        volumes:
-            - .:/var/www:cached
+  php-fpm:
+    # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
+    build:
+      context: .
+      dockerfile: ./docker/common/php-fpm/Dockerfile
+      target: production # Use the 'production' stage in the Dockerfile
+    restart: unless-stopped
+    ports:
+      - 9000
+    volumes:
+      - habits-storage-production:/var/www/storage # Mount the storage volume
+    env_file:
+      - .env
+    networks:
+      - laravel-production
+      - proxy-network
+    healthcheck:
+      test: ["CMD-SHELL", "php-fpm-healthcheck || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    # The 'depends_on' attribute with 'condition: service_healthy' ensures that
+    # this service will not start until the 'postgres' service passes its health check.
+    # This prevents the application from trying to connect to the database before it's ready.
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # The 'php-cli' service provides a command-line interface for running Artisan commands and other CLI tasks.
+  # -----------------------------------------------------------
+  # This is useful for running migrations, seeders, or any custom scripts.
+  # It shares the same codebase and environment as the 'php-fpm' service.
+  # -----------------------------------------------------------
+  php-cli:
+    build:
+      context: .
+      dockerfile: ./docker/php-cli/Dockerfile
+    tty: true # Enables an interactive terminal
+    stdin_open: true # Keeps standard input open for 'docker exec'
+    env_file:
+      - .env
+    networks:
+      - laravel-production
 
 networks:
-    sail:
-        driver: bridge
+  # Attach the service to the 'laravel-production' network.
+  # -----------------------------------------------------------
+  # This custom network allows all services within it to communicate using their service names as hostnames.
+  # For example, 'php-fpm' can connect to 'postgres' by using 'postgres' as the hostname.
+  # -----------------------------------------------------------
+  laravel-production:
+  sail:
+    driver: bridge
+  proxy-network:
+    external: true
 
 volumes:
-    sail-mysql:
-        driver: local
+  habits-storage-production:
+  sail-mysql:
+    driver: local
