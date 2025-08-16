@@ -41,6 +41,8 @@ services:
   # It shares the same codebase and environment as the 'php-fpm' service.
   # -----------------------------------------------------------
   php-cli:
+    volumes:
+      - habits-production:/var/www/habits # Mount the application code
     build:
       context: .
       dockerfile: ./docker/php-cli/Dockerfile
