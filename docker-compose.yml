@@ -28,7 +28,7 @@ services:
     ports:
       - 9000
     volumes:
-      - habits-production:/var/www/html # Mount the application code
+      - habits-production:/var/www # Mount the application code
       - habits-storage-production:/var/www/storage # Mount the storage volume
     env_file:
       - .env
