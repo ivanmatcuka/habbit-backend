@@ -28,7 +28,7 @@ services:
       - 9000
     volumes:
       - habits-production:/var/www/habits # Mount the application code
-      - habits-storage-production:/var/www/habits/storage # Mount the storage volume
+      - habits-storage-production:/var/www/habits/storage:ro # Mount the storage volume
     env_file:
       - .env
     networks:
