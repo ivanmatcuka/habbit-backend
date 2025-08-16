@@ -28,7 +28,6 @@ services:
       - 9000
     volumes:
       - habits-production:/var/www/habits # Mount the application code
-      - habits-storage-production:/var/www/habits/storage:ro # Mount the storage volume
     env_file:
       - .env
     networks:
@@ -61,8 +60,6 @@ networks:
 
 volumes:
   habits-production:
-    external: true
-  habits-storage-production:
     external: true
   sail-mysql:
     driver: local
