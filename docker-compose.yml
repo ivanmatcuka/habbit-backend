@@ -62,6 +62,8 @@ networks:
 
 volumes:
   habits-production:
+    external: true
   habits-storage-production:
+    external: true
   sail-mysql:
     driver: local
