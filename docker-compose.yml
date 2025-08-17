@@ -1,8 +1,8 @@
 services:
-  habit_mysql:
+  habits_mysql:
     image: mysql
     restart: always
-    container_name: habbit_mysql
+    container_name: habits_mysql
     env_file: .env
     environment:
       MYSQL_DATABASE: '${DB_DATABASE}'
@@ -12,14 +12,11 @@ services:
     ports:
       - 3306
     volumes:
-      - 'sail-mysql:/var/lib/mysql'
-      - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+      - 'habits-mysql:/var/lib/mysql'
     networks:
-      - sail
-      - laravel-production
+      - habits-network
 
-  php-fpm:
-    # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
+  habits_fpm:
     build:
       context: .
       dockerfile: ./docker/common/php-fpm/Dockerfile
@@ -27,35 +24,28 @@ services:
     ports:
       - 9000
     volumes:
-      - habits-production:/var/www/habits # Mount the application code
+      - habits-production:/var/www/habits
     env_file:
       - .env
     networks:
-      - laravel-production
       - proxy-network
-      - sail
+      - habits-network
 
-  # The 'php-cli' service provides a command-line interface for running Artisan commands and other CLI tasks.
-  # -----------------------------------------------------------
-  # This is useful for running migrations, seeders, or any custom scripts.
-  # It shares the same codebase and environment as the 'php-fpm' service.
-  # -----------------------------------------------------------
-  php-cli:
+  habits_cli:
     volumes:
-      - habits-production:/var/www/habits # Mount the application code
+      - habits-production:/var/www/habits
     build:
       context: .
       dockerfile: ./docker/php-cli/Dockerfile
-    tty: true # Enables an interactive terminal
-    stdin_open: true # Keeps standard input open for 'docker exec'
+    tty: true
+    stdin_open: true
     env_file:
       - .env
     networks:
-      - laravel-production
+      - habits-network
 
 networks:
-  laravel-production:
-  sail:
+  habits-network:
     driver: bridge
   proxy-network:
     external: true
@@ -63,5 +53,5 @@ networks:
 volumes:
   habits-production:
     external: true
-  sail-mysql:
+  habits-mysql:
     driver: local
