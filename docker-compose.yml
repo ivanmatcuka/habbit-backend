@@ -17,6 +17,7 @@ services:
       - habits-network
 
   habits_fpm:
+    container_name: habits_fpm
     build:
       context: .
       dockerfile: ./docker/common/php-fpm/Dockerfile
@@ -32,6 +33,7 @@ services:
       - habits-network
 
   habits_cli:
+    container_name: habits_cli
     volumes:
       - habits-production:/var/www/habits
     build:
